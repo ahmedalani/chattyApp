@@ -4,27 +4,35 @@ class ChatBar extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: this.props.currentUser,
+      username: '',
       content: ''
     }
-    this.handleUsernameChange = this.handleUsernameChange.bind(this);
     this.msgEntered = this.msgEntered.bind(this);
-    this.changeContent = this.changeContent.bind(this);
+    this.usernameEnter = this.usernameEnter.bind(this);
+    this.msgChange = this.msgChange.bind(this);
+    this.usernameChange = this.usernameChange.bind(this);    
   }
 
-  handleUsernameChange(event) {
-    this.setState({username: event.target.value});
+  usernameChange(event) {
+    this.setState({ username: event.target.value });
   }
 
-  changeContent(event) {
-    this.setState({content: event.target.value});
+  usernameEnter(event) {
+    const { key } = event;
+    if (key === 'Enter') {
+      this.props.changeUsername(this.state.username);
+    }
+  }
+
+  msgChange(event) {
+    this.setState({ content: event.target.value });
   }
 
   msgEntered(event) {
-    // this.setState({content: event.target.value});
-    if (event.key === 'Enter') {
-      this.props.getMsgFromChatBarData(this.state.content, this.state.username); 
-      this.setState({content: ''});      
+    const { key } = event;    
+    if (key === 'Enter') {
+      this.props.addNewMessage(this.state.username, this.state.content);
+      this.setState({ content: '' });
     }
   }
 
@@ -32,14 +40,15 @@ class ChatBar extends Component {
     return (
       <div>
         <footer className="chatbar">
-          <input className="chatbar-username" 
-            value={this.state.username} onChange={this.handleUsernameChange}
+          <input className="chatbar-username"
+            value={this.state.username}
+            onChange={this.usernameChange}
+            onKeyUp={this.usernameEnter}
           />
           <input className="chatbar-message" placeholder="Type a message and hit ENTER"
-             value={this.state.content}
-             onKeyUp={this.msgEntered}
-             onChange={this.changeContent}
-            // onKeyPress={check if keyPressed is ENTER, pass the data to the App component} 
+            value={this.state.content}
+            onChange={this.msgChange}
+            onKeyUp={this.msgEntered}
           />
         </footer>
       </div>

@@ -2,62 +2,82 @@ import React, { Component } from 'react';
 import MessageList from './MessageList.jsx';
 import ChatBar from './ChatBar.jsx';
 
-const data = {
-  currentUser: { name: "Bob" }, // optional. if currentUser is not defined, it means the user is Anonymous
-  messages: [
-    {
-      username: "Bob",
-      content: "Has anyone seen my marbles?",
-      id: 1
-    },
-    {
-      username: "Anonymous",
-      content: "No, I think you lost them. You lost your marbles Bob. You lost them for good.",
-      id: 2
-    }
-  ]
-}
-
-
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = data;
+    this.state = {
+      connectedUsers: 0,
+      username: '',
+      messages: [
+        {
+          id: '',
+          username: '',
+          content: ''
+        }
+      ]
+    };
 
     this.addNewMessage = this.addNewMessage.bind(this);
+    this.changeUsername = this.changeUsername.bind(this);
   }
 
   componentDidMount() {
-    console.log("componentDidMount <App />");
-    setTimeout(() => {
-      console.log("Simulating incoming message");
-      // Add a new message to the list of messages in the data store
-      const newMessage = {id: 3, username: "Michelle", content: "Hello there!"};
-      const messages = this.state.messages.concat(newMessage)
-      // Update the state of the app component.
-      // Calling setState will trigger a call to render() in App and all child components.
-      this.setState({messages: messages})
-    }, 1000);
+    this.socket = new WebSocket('ws://0.0.0.0:3001');
+    this.socket.onopen = function () {
+      console.log('connection open');
+    }
+
+    this.socket.onmessage = (event) => {
+      const { id, type, content, ...rest } = JSON.parse(event.data);
+      switch (type) {
+        case 'message': {
+          const { username } = rest;
+          let newMsg = { id, type, username, content };
+          this.setState({ username, messages: this.state.messages.concat(newMsg) });
+        }
+          break;
+        case 'notification': {
+          const { newUsername } = rest;
+          let newMsg = { id, type, username: newUsername, content };
+          this.setState({ username: newUsername, messages: this.state.messages.concat(newMsg) });
+        }
+          break;
+        case 'onlineUser': {
+          const { connectedUsers } = rest;
+          this.setState({connectedUsers});
+        }
+          break;
+      }
+    }
   }
 
-  //get the message content and the user from ChatBar and concatnate the new message to the state
-  addNewMessage(msgContent, msgUsername) {
-    const {messages} = this.state;
-    let newMsg = {username: msgUsername, content: msgContent, id: messages.length +1};
-    this.setState({messages: messages.concat(newMsg)});
-
+  //when user change info the function get called in the Chatbar component passing
+  //the data. the function will send the notification to the server to broadcast
+  changeUsername(newName) {
+    const { username } = this.state;
+    this.setState({ username: newName });
+    let newMsg = { type: 'nameChange', username, newUsername: newName };
+    this.socket.send(JSON.stringify(newMsg));
   }
+
+  //get the message content and the user from ChatBar and send it to the server
+  addNewMessage(msgUsername, msgContent) {
+    let newMsg = { type: 'message', username: msgUsername, content: msgContent };
+    this.socket.send(JSON.stringify(newMsg));
+  }
+
   render() {
-    const {messages, currentUser} = this.state
+    const { connectedUsers, messages } = this.state
     return (
       <div>
         <nav className="navbar">
           <a href="/" className="navbar-brand">Chatty</a>
+          <div className="connectedUsers"> {connectedUsers} users Online </div>
         </nav>
-        <MessageList messages={messages}/>
-        <ChatBar 
-          currentUser={currentUser.name}
-          getMsgFromChatBarData={this.addNewMessage}
+        <MessageList messages={messages} />
+        <ChatBar
+          addNewMessage={this.addNewMessage}
+          changeUsername={this.changeUsername}
         />
       </div>
     );
