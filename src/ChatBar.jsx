@@ -1,37 +1,39 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 
 class ChatBar extends Component {
+  static propTypes = {
+    username: PropTypes.string,
+    changeUsername: PropTypes.func,
+    addNewMessage: PropTypes.func,
+  }
+
   constructor(props) {
     super(props);
     this.state = {
-      username: '',
+      username: props.username,
       content: ''
-    }
-    this.msgEntered = this.msgEntered.bind(this);
-    this.usernameEnter = this.usernameEnter.bind(this);
-    this.msgChange = this.msgChange.bind(this);
-    this.usernameChange = this.usernameChange.bind(this);    
+    }   
   }
 
-  usernameChange(event) {
+  usernameChange = (event) => {
     this.setState({ username: event.target.value });
   }
 
-  usernameEnter(event) {
+  usernameEnter= (event) => {
     const { key } = event;
     if (key === 'Enter') {
       this.props.changeUsername(this.state.username);
     }
   }
 
-  msgChange(event) {
+  msgChange = (event) => {
     this.setState({ content: event.target.value });
   }
 
-  msgEntered(event) {
+  msgEntered = (event) => {
     const { key } = event;    
     if (key === 'Enter') {
-      this.props.addNewMessage(this.state.username, this.state.content);
+      this.props.addNewMessage(this.state.content);
       this.setState({ content: '' });
     }
   }
