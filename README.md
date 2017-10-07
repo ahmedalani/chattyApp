@@ -7,6 +7,8 @@ ChatApp
 
 - Connected users can chat, no registeration or login needed. User is able to     change name and see online-user-count live.
 
+- The Chatty client app and Chatty websocket server are separate Node apps each with their own package.json 
+
 SCREENSHOT: 
 1- https://raw.githubusercontent.com/ahmedalani/chattyApp/master/screenShots/ScreenShot1.png
 
