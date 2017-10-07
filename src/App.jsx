@@ -8,13 +8,7 @@ export default class App extends Component {
     this.state = {
       connectedUsers: 0,
       username: 'Anonymous',
-      messages: [
-        // {
-        //   id: '',
-        //   username: '',
-        //   content: ''
-        // }
-      ]
+      messages: []
     };
   }
 
@@ -49,7 +43,7 @@ export default class App extends Component {
   }
 
   appendMessage(message) {
-    this.setState({ messages: [...this.state.messages, message]});
+    this.setState({ messages: [...this.state.messages, message] });
   }
 
   sendData(payload) {

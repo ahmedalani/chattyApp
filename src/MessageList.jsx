@@ -12,7 +12,7 @@ export default class MessageList extends Component {
 
 	render() {
 		let msgList = this.props.messages.map(msg => {
-			return <Message key={msg.id} user={msg.username} msg={msg.content} />
+			return <Message key={msg.id} type={msg.type} user={msg.username} msg={msg.content} />
 		});
 
 		return (
